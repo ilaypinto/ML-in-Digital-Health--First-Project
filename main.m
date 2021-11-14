@@ -1,10 +1,13 @@
 clc; clear all; close all;
 % this is the main script to manage the workflow
 
+%% this function is needed only once to organize all the files in folders.
+folders = create_data_folders('C:\Users\tomer\Desktop\חישה רציפה\matlab code\first project\project\data\meta-motion\Full recordings\הקלטות mmr');
+%%
 % preprocess all relevant data      
-num_recordings = 12;            % change according to number of reecordings
-data = cell(1,num_recordings);  % we will store the data in a cell array, each object in it is a structure.    
-for i = 1:num_recordings
+
+data = cell(1,folders(end));  % we will store the data in a cell array, each object in it is a structure.    
+for i = folders
     char = int2str(i);
     data{1,i} = preproccess_data(char);
 end

@@ -14,19 +14,19 @@ for i = 1:length(indx)
     baro_not_empty = ~isempty(find(baro(1,:),1));  % check if baro is available
 
     % first movement - zoom in
-    gyro_idx_1 = find(gyro(4,:) == 1);
-    acc_idx_1 = find(acc(4,:) == 1);
+    gyro_idx_1 = find(gyro(4,:) == 12);
+    acc_idx_1 = find(acc(4,:) == 12);
     if baro_not_empty
-        baro_idx_1 = find(baro(2,:) == 1);
+        baro_idx_1 = find(baro(2,:) == 12);
     else
         baro_idx_1 = [];
     end
 
     % second movement - zoom out
-    gyro_idx_2 = find(gyro(4,:) == 2);
-    acc_idx_2 = find(acc(4,:) == 2);
+    gyro_idx_2 = find(gyro(4,:) == 22);
+    acc_idx_2 = find(acc(4,:) == 22);
     if baro_not_empty
-        baro_idx_2 = find(baro(2,:) == 2);
+        baro_idx_2 = find(baro(2,:) == 22);
     else
         baro_idx_2 = [];
     end
@@ -235,9 +235,6 @@ for i = 1:length(indx)
     subplot(3,6,18);
     plot(acc_idx_6./acc_gyro_hz,acc(3,acc_idx_6));
     title('6 - z axis'); xlabel('time [sec]'); ylabel('acceleration [g]');
-    
- 
-
 end
 end
 

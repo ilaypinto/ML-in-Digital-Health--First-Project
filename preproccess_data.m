@@ -22,7 +22,7 @@ for i = 3:length(list)                                          % search for the
 end
 sample_freq = [25, 3.82];                           % define the sample frequency
 time = 30*60;                               % define the time of the signal in sec
-labels_time = [0,0,2,2,2,2,2,2,2,0,2,2,0,0,0,0,0,0,0,0,2,2];                % define the time that each action takes in seconds
+labels_time = 7;                % define the time that each action takes in seconds
 
 labels_gyro_acc = zeros(1,time*sample_freq(1));                    % start with unlabeled vector
 labels_baro = zeros(1, time*sample_freq(2));
@@ -31,8 +31,8 @@ for i = 1:length(data.SecondsFromRecordingStart)
     label = data.Label(i);                              % get the label number
     start_time = data.SecondsFromRecordingStart(i);     % get the start time of the movment
     % label the movment relativly to the time and duration it's been taken and take 10 samples bacwards as a saftey factor
-    labels_gyro_acc(1,start_time*sample_freq(1) - 10:start_time*sample_freq(1) + labels_time(label)*sample_freq(1)) = label;   
-    labels_baro(1,round(start_time*sample_freq(2)) - 1: round(start_time*sample_freq(2)) + round(labels_time(label)*sample_freq(2))) = label;
+    labels_gyro_acc(1,start_time*sample_freq(1) - 25:start_time*sample_freq(1) + labels_time*sample_freq(1)) = label;   
+    labels_baro(1,round(start_time*sample_freq(2)) - 4: round(start_time*sample_freq(2)) + round(labels_time*sample_freq(2))) = label;
 end
 
 % create the data vectors from Gyro Acc & baro
@@ -56,9 +56,9 @@ for i = 3:length(list)
     end
 end
 
-proccessed_data.gyro = [gyro_x; gyro_y; gyro_z; labels_gyro_acc];
-proccessed_data.acc = [acc_x; acc_y; acc_z; labels_gyro_acc];
-proccessed_data.baro = [baro; labels_baro];
+proccessed_data.gyro = [gyro_x; gyro_y; gyro_z; labels_gyro_acc(1:time*sample_freq(1))];
+proccessed_data.acc = [acc_x; acc_y; acc_z; labels_gyro_acc(1:time*sample_freq(1))];
+proccessed_data.baro = [baro; labels_baro(1:time*sample_freq(2))];
 
 save(strcat(path,'/',group_num,'.',foldername,'.proccessed_data.mat'), 'proccessed_data');
 warning('on','all')
