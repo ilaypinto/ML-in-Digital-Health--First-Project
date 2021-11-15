@@ -6,21 +6,23 @@ folders = create_data_folders('C:\Users\tomer\Desktop\חישה רציפה\matlab
 %%
 % preprocess all relevant data      
 
-data = cell(1,folders(end));  % we will store the data in a cell array, each object in it is a structure.    
+data = cell(1,folders(end));  % we will store the data in a cell array, each object in it is a structure. 
+warning('off','all');
 for i = folders
     char = int2str(i);
     data{1,i} = preproccess_data(char);
 end
+warning('on','all')
 %%
 struc.gyro = [];
-struc.acc = [];
+struc.acc  = [];
 struc.baro = [];
 data_sampels = cell(1,9);
 for i = 1:9
     data_sampels{i} = struc;
 end
 
-for i = 1:num_recordings
+for i = folders
     sampels = extract_sampels(data{1,i});
     for j = 1:length(data_sampels)
         if isempty(sampels{j})

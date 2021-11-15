@@ -4,10 +4,10 @@ function windows = extract_sampels(datastruct)
 % the order of labels in the cell is  [12 22 3 4 5 6 11 21 0]
 % need to add 0 label sections!!!
 
-labels_time = [2,2,2,2,2,2,2,2,2];
+labels_time = 7;
 sample_freq = [25, 3.82];
-window_size = labels_time.*sample_freq(1) + 10;
-window_size_baro = round(labels_time.*sample_freq(2)) + 1;
+window_size = labels_time.*sample_freq(1) + 26;
+window_size_baro = round(labels_time.*sample_freq(2)) + 5;
 % extract the data from each sensor
 gyro = datastruct.gyro;
 acc = datastruct.acc;
@@ -17,15 +17,15 @@ baro = datastruct.baro;
 labels = gyro(4,:);
 labels_baro = baro(2,:);
 
-num_0 = length(find(labels == 0))/window_size(9);
-num_12 = length(find(labels == 12))/window_size(1);
-num_22 = length(find(labels == 22))/window_size(2);
-num_3 = length(find(labels == 3))/window_size(3);
-num_4 = length(find(labels == 4))/window_size(4);
-num_5 = length(find(labels == 5))/window_size(5);
-num_6 = length(find(labels == 6))/window_size(6);
-num_11 = length(find(labels == 11))/window_size(7);
-num_21 = length(find(labels == 21))/window_size(8);
+num_0  = floor(length(find(labels == 0))/window_size);
+num_12 = length(find(labels == 12))/window_size;
+num_22 = length(find(labels == 22))/window_size;
+num_3  = length(find(labels == 3))/window_size;
+num_4  = length(find(labels == 4))/window_size;
+num_5  = length(find(labels == 5))/window_size;
+num_6  = length(find(labels == 6))/window_size;
+num_11 = length(find(labels == 11))/window_size;
+num_21 = length(find(labels == 21))/window_size;
 
 labels_numbers = [12 22 3 4 5 6 11 21 0];
 total_num = [num_12 num_22 num_3 num_4 num_5 num_6 num_11 num_21 num_0];
@@ -43,9 +43,9 @@ for i = 1:8
         move.acc = [];
         move.baro = [];
         for j = 0:total_num(i) - 1
-            move.gyro(:,:,j + 1) = move_gyro(:,j*window_size(i) + 1:window_size(i)*(j + 1));
-            move.acc(:,:,j + 1) = move_acc(:,j*window_size(i) + 1:window_size(i)*(j + 1));
-            move.baro(:,:,j + 1) = move_baro(:,j*window_size_baro(i) + 1:window_size_baro(i)*(j + 1));
+            move.gyro(:,:,j + 1) = move_gyro(:,j*window_size + 1:window_size*(j + 1));
+            move.acc(:,:,j + 1) = move_acc(:,j*window_size + 1:window_size*(j + 1));
+            move.baro(:,:,j + 1) = move_baro(:,j*window_size_baro + 1:window_size_baro*(j + 1));
         end
         windows{i} = move;
     end
