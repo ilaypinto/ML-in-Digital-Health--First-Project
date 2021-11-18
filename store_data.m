@@ -1,10 +1,11 @@
-function proccessed_data = preproccess_data(foldername)
+function stored_data = store_data(foldername, labels_time)
 % this fnuction creates a structure containing the recording from all the
 % available sensors. the structure contains 3 fields - gyro, acc and baro.
 % each field is a matrix in which each row is data from different axis in
 % the following order - x,y,z,labels.
 % baro field will be zeros if no record is available. 
 
+% extract files for later use
 path = strcat('data/meta-motion/Full recordings/' ,foldername);
 list = dir(path);
 
@@ -21,29 +22,36 @@ for i = 3:length(list)                                          % search for the
 end
 sample_freq = [25, 3.82];                   % define the sample frequency
 time = 30*60;                               % define the time of the signal in sec
-labels_time = 7;                            % define the time that each action takes in seconds
 headers = data.Properties.VariableNames;    % get table headers
 
-labels_gyro_acc = zeros(1,time*sample_freq(1));                    % start with unlabeled vector
-labels_baro = zeros(1, time*sample_freq(2));
+labels_gyro_acc = zeros(1,time*sample_freq(1));    % start with unlabeled vector
+labels_baro     = zeros(1, time*sample_freq(2));   % matching a recording of 30 min
+
+% define window size After and Before start time for each sensor
+A_WS_Gyro_ACC = round(labels_time*sample_freq(1)*0.9);
+B_WS_Gyro_ACC = round(labels_time*sample_freq(1)*0.1);
+
+A_WS_baro = round(labels_time*sample_freq(2)*0.9);
+B_WS_baro = round(labels_time*sample_freq(2)*0.1);
 
 for i = 1:height(data(:,headers(1)))
-    times = table2array(data(:, headers(1)));
-    labels = table2array(data(:,headers(2)));
-    label = labels(i);                              % get the label number
-    start_time = times(i);                          % get the start time of the movment
-    if start_time*sample_freq(1) + labels_time*sample_freq(1) >= length(labels_gyro_acc) || ...
-            round(start_time*sample_freq(2)) + round(labels_time*sample_freq(2)) >= length(labels_baro)||...
-            start_time*sample_freq(1) - 25 < 0 || start_time*sample_freq(2) - 4 < 0
+    times      = table2array(data(:, headers(1)));
+    labels     = table2array(data(:,headers(2)));
+    label      = labels(i);                              % get the label number
+    start_time = times(i);                               % get the start time of the movment
+    if start_time*sample_freq(1) + A_WS_Gyro_ACC > length(labels_gyro_acc) || ...
+            round(start_time*sample_freq(2)) + A_WS_baro > length(labels_baro)||...
+            start_time*sample_freq(1) - B_WS_Gyro_ACC < 1 || start_time*sample_freq(2) - B_WS_baro < 1
         continue
     else
-    % label the movment relativly to the time and duration it's been taken and take 10 samples bacwards as a saftey factor
-    labels_gyro_acc(1,start_time*sample_freq(1) - 25:start_time*sample_freq(1) + labels_time*sample_freq(1)) = label;   
-    labels_baro(1,round(start_time*sample_freq(2)) - 4: round(start_time*sample_freq(2)) + round(labels_time*sample_freq(2))) = label;
+    % label the movment relativly to the time and duration it's been taken and take some samples bacwards as a saftey factor
+    labels_gyro_acc(1,start_time*sample_freq(1) - B_WS_Gyro_ACC:start_time*sample_freq(1) + A_WS_Gyro_ACC) = label;   
+    labels_baro(1,round(start_time*sample_freq(2)) - B_WS_baro: round(start_time*sample_freq(2)) + A_WS_baro) = label;
     end
 end
 
-% create the data vectors from Gyro Acc & baro
+% create the data vectors from Gyro Acc & baro - the vectors are trimmed or
+% padded with zeros in case they dont match to recording time of 30 min!!
 baro = zeros(1,time*sample_freq(2));       % baro will be zero vector if no measurments are available
 for i = 3:length(list)                                          
     if list(i).name(end-7:end-4) == 'Gyro'
@@ -83,9 +91,9 @@ for i = 3:length(list)
     end
 end
 
-proccessed_data.gyro = [gyro_x; gyro_y; gyro_z; labels_gyro_acc(1:time*sample_freq(1))];
-proccessed_data.acc = [acc_x; acc_y; acc_z; labels_gyro_acc(1:time*sample_freq(1))];
-proccessed_data.baro = [baro; labels_baro(1:time*sample_freq(2))];
+stored_data.gyro = [gyro_x; gyro_y; gyro_z; labels_gyro_acc(1:time*sample_freq(1))];
+stored_data.acc = [acc_x; acc_y; acc_z; labels_gyro_acc(1:time*sample_freq(1))];
+stored_data.baro = [baro; labels_baro(1:time*sample_freq(2))];
 
-save(strcat(path,'/',group_num,'.',foldername,'.proccessed_data.mat'), 'proccessed_data');
+save(strcat(path,'/',group_num,'.',foldername,'.proccessed_data.mat'), 'stored_data');
 end

@@ -1,43 +1,70 @@
 clc; clear all; close all;
 % this is the main script to manage the workflow
 
-%% this function is needed only once to organize all the files in folders.
-folders = create_data_folders('C:\Users\tomer\Desktop\חישה רציפה\matlab code\first project\project\data\meta-motion\Full recordings\הקלטות mmr');
-%%
-% preprocess all relevant data      
+% define some usefull flags
+flag_store = 1;         % decide if u want to pull data from csv files or load the saved data
 
-data = cell(1,folders(end));  % we will store the data in a cell array, each object in it is a structure. 
-warning('off','all');
-for i = folders
-    char = int2str(i);
-    data{1,i} = preproccess_data(char);
+% define some variables
+label_time = 3;
+overlap = 90;
+segmentation = ['moving window'; 'event trigger'];
+
+%% preproccessing the data
+% create a folder for each recording containing the sensors data and labels
+% csv files - folders is a vector with the folders names
+folders = create_data_folders('C:\Users\tomer\Desktop\חישה רציפה\matlab code\first project\project\data\meta-motion\Full recordings\הקלטות mmr');
+
+% read all the csv files and store the data in a cell array - long run time
+if flag_store
+    data = cell(1,folders(end));  % we will store the data in a cell array, each object in it is a structure. 
+    warning('off','all');
+    for i = folders
+        char = int2str(i);
+        data{1,i} = store_data(char, label_time);
+    end
+    save('data','data')
+    warning('on','all')
+else
+    data = load('data.mat');
+    data = data.data;
 end
-warning('on','all')
-%%
+
+%% sort the recording by movement labels
 struc.gyro = [];
 struc.acc  = [];
 struc.baro = [];
-data_sampels = cell(1,9);
-for i = 1:9
-    data_sampels{i} = struc;
-end
+data_sampels = repmat(struc,1,9);
 
-for i = folders
-    sampels = extract_sampels(data{1,i});
+for i = 181:193
+    [sampels, labels_tags] = extract_sampels(data{1,i}, label_time, overlap, segmentation(1,:));
     for j = 1:length(data_sampels)
-        if isempty(sampels{j})
+        if isempty(sampels(j).gyro)
             continue
         end
-        my_struc = data_sampels{j};
-        my_struc.gyro = cat(3, my_struc.gyro, sampels{j}.gyro);
-        my_struc.acc = cat(3, my_struc.acc, sampels{j}.acc);
-        my_struc.baro = cat(3, my_struc.baro, sampels{j}.baro);
-        data_sampels{j} = my_struc;
+        my_struc = data_sampels(j);
+        my_struc.gyro = cat(3, my_struc.gyro, sampels(j).gyro);
+        my_struc.acc = cat(3, my_struc.acc, sampels(j).acc);
+        my_struc.baro = cat(3, my_struc.baro, sampels(j).baro);
+        data_sampels(j) = my_struc;
     end
 end
+%%
+indx = 181;
+gyro_1 = data{1,indx}.gyro;
+figure(1);
+plot((1:length(gyro_1(1,:))),gyro_1(1:3,:)); hold on; plot(find(gyro_1(4,:) ~= 0), gyro_1(4,gyro_1(4,:) ~= 0),'b*' ); hold off;
+
+
+
 
 %%
-% plot some random signals in our interest time
-indx = randi(num_recordings,1,3);
-plot_data_time(data,indx);
-
+for i = 1:9
+    for j = 1:size(data_sampels(i).gyro,3)
+        L = data_sampels(i);
+        figure(2);
+        plot((1:length(L.gyro(1,:,j))),L.gyro(:,:,j));
+        pause()
+    end
+end
+%%
+% features = create_features(data_sampels{1});
