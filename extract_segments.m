@@ -1,4 +1,4 @@
-function [windows, labels_tags] = extract_sampels(datastruct, labels_time, overlap, segment_type)
+function [windows, labels_tags] = extract_segments(datastruct, labels_time, overlap, segment_type)
 % ############### add event trigger segmentation ##################
 % datastruct - data structure containing sensors data and labels
 % labels time - labels duration
