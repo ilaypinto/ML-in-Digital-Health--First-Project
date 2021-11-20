@@ -1,6 +1,6 @@
 clc; clear all; close all;
-% this is the main script to manage the workflow
-% If its the first time you run this script make sure all flags are set to 1!
+% this is the main script to manage our workflow
+%  ##### If its the first time you run this script make sure all flags are set to 1 #####
 
 % set some usefull flags
 flag_store   = 0;       % decide if u want to pull data from csv files or load the saved data
@@ -62,10 +62,10 @@ else
     segments_MW = segments_MW.data_sampels;
 end
 
-% Event Trigger segmentation
+% Event Trigger segmentation - ###### need to add it in extract_segments ######
 if flag_segm_ET
     for i = 181:193
-        [temp_segments_ET, labels_tags] = extract_segments(data{1,i}, label_time, overlap, segmentation(1,:));
+        [temp_segments_ET, labels_tags] = extract_segments(data{1,i}, label_time, overlap, segmentation(2,:));
         for j = 1:9
             if isempty(temp_segments_ET(j).gyro)
                 continue
@@ -83,16 +83,15 @@ else
     segments_ET = segments_ET.data_sampels;
 end
 
-%%
+% %%this are some plots to check the segmentation and label process is done as we wish - 
+% % need to change some variables names (haven't changed it since it was
+% under % mark)
 % indx = 181;
 % gyro_1 = data{1,indx}.gyro;
 % figure(1);
 % plot((1:length(gyro_1(1,:))),gyro_1(1:3,:)); hold on; plot(find(gyro_1(4,:) ~= 0), gyro_1(4,gyro_1(4,:) ~= 0),'b*' ); hold off;
 % 
-% 
-% 
-% 
-% %%
+
 % for i = 1:9
 %     for j = 1:size(data_sampels(i).gyro,3)
 %         L = data_sampels(i);
