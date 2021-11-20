@@ -5,8 +5,8 @@ function [windows, labels_tags] = extract_sampels(datastruct, labels_time, overl
 % overlap - windows percentage of overlapping
 % segment type - event triger/moving window
 
-% this function recieves a data structer and output a cell with
-% a structure with fields - gyro, acc, baro.
+% this function recieves a data structer and output a matrix with
+% structures with fields - gyro, acc, baro.
 % each field is a 3 dim matrix, firs dim is axis (in the following order - x,y,z),
 % second dim is the data, third dim is for windows separation.
 
@@ -58,8 +58,8 @@ if strcmp(segment_type, 'moving window')
         end
         windows_idx = find(labels_tags == tag);          % where to store the data in windows
         % extract sensors data
-        window_gyro = gyro(1, index_gyro_acc: index_gyro_acc + window_size_gyro_acc);
-        window_acc = acc(1, index_gyro_acc: index_gyro_acc + window_size_gyro_acc);
+        window_gyro = gyro(1:3, index_gyro_acc: index_gyro_acc + window_size_gyro_acc);
+        window_acc = acc(1:3, index_gyro_acc: index_gyro_acc + window_size_gyro_acc);
         window_baro = baro(1, index_baro: index_baro + window_size_baro);
         % append into windows
         windows(windows_idx).gyro = cat(3, windows(windows_idx).gyro, window_gyro);
