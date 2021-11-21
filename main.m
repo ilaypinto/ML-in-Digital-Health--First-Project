@@ -3,29 +3,29 @@ clc; clear all; close all;
 %  ##### If its the first time you run this script make sure all flags are set to 1 #####
 
 % set some usefull flags
-flag_store   = 0;       % decide if u want to pull data from csv files or load the saved data
-flag_segm_MW = 1;       % 1 - use the MW segmentation function, 0 - load saved segments
-flag_segm_ET = 1;       % 1 - use the ET segmentation function, 0 - load saved segments
-flag_feat_MW = 1;       % 1 - compute features for MW segments, 0 - load features
-flag_feat_ET = 1;       % 1 - compute features for ET segments, 0 - load features
+flag_data_csv = 0;          % 1 - extract data from csv files,      0 - load data from saved mat file
+flag_segm_MW  = 0;          % 1 - use the MW segmentation function, 0 - load saved segments
+flag_segm_ET  = 1;          % 1 - use the ET segmentation function, 0 - load saved segments
+flag_feat_MW  = 1;          % 1 - compute features for MW segments, 0 - load features
+flag_feat_ET  = 1;          % 1 - compute features for ET segments, 0 - load features
 
-% define some variables used in multiple functions
+% define some variables for later use
 label_time = 3;
 overlap = 90;
 segmentation = ['moving window'; 'event trigger'];
 
 %% order data in folders and load data from csv files
 % create a folder for each recording containing the sensors data and labels
-% csv files - folders is a vector with the folders names
+% csv files - folders is a vector with the folders numbers
 folders = create_data_folders('C:\Users\tomer\Desktop\חישה רציפה\matlab code\first project\project\data\meta-motion\Full recordings\הקלטות mmr');
 
 % read all the csv files and store the data in a cell array - long run time
-if flag_store
+if flag_data_csv
     data = cell(1,folders(end));  % we will store the data in a cell array, each object in it is a structure. 
     warning('off','all');
     for i = folders
         char = int2str(i);
-        data{1,i} = store_data(char, label_time);
+        data{1,i} = extract_data(char, label_time);
     end
     save('data','data')
     warning('on','all')
@@ -35,6 +35,7 @@ else
 end
 
 %% segmentation and sorting the recording by movement labels - Moving Window & Event Trigger
+% initialize matrixes with empty structures
 struc.gyro = [];
 struc.acc  = [];
 struc.baro = [];
@@ -59,12 +60,13 @@ if flag_segm_MW
     save('MV_segmentation', 'segments_MW')
 else
     segments_MW = load('MV_segmentation.mat');
-    segments_MW = segments_MW.data_sampels;
+    segments_MW = segments_MW.segments_MW;
+    labels_tags = [12 22 3 4 5 6 11 21 0];
 end
 
 % Event Trigger segmentation - ###### need to add it in extract_segments ######
 if flag_segm_ET
-    for i = 181:193
+    for i = 181:192
         [temp_segments_ET, labels_tags] = extract_segments(data{1,i}, label_time, overlap, segmentation(2,:));
         for j = 1:9
             if isempty(temp_segments_ET(j).gyro)
@@ -80,34 +82,37 @@ if flag_segm_ET
     save('ET_segmentation', 'segments_ET');
 else
     segments_ET = load('ET_segmentation.mat');
-    segments_ET = segments_ET.data_sampels;
+    segments_ET = segments_ET.segments_ET;
+    labels_tags = [12 22 3 4 5 6 11 21 0];
 end
 
-% %%this are some plots to check the segmentation and label process is done as we wish - 
-% % need to change some variables names (haven't changed it since it was
+%% this are some plots to check the segmentation and label process is done as we wish - 
+% need to change some variables names (haven't changed it since it was
 % under % mark)
-% indx = 181;
-% gyro_1 = data{1,indx}.gyro;
-% figure(1);
-% plot((1:length(gyro_1(1,:))),gyro_1(1:3,:)); hold on; plot(find(gyro_1(4,:) ~= 0), gyro_1(4,gyro_1(4,:) ~= 0),'b*' ); hold off;
-% 
 
-% for i = 1:9
-%     for j = 1:size(data_sampels(i).gyro,3)
-%         L = data_sampels(i);
-%         figure(2);
-%         plot((1:length(L.gyro(1,:,j))),L.gyro(:,:,j));
-%         pause()
-%     end
-% end
+indx = 150;
+gyro_1 = data{1,indx}.gyro;
+figure(1);
+plot((1:length(gyro_1(1,:))),gyro_1(1:3,:)); hold on; plot(find(gyro_1(4,:) ~= 0), gyro_1(4,gyro_1(4,:) ~= 0),'b*' ); hold off;
+
+%%
+for i = 1:9
+    for j = 1:size(segments_ET(i).gyro,3)
+        L = segments_ET(i);
+        figure(2);
+        plot((1:length(L.gyro(1,:,j))),L.gyro(:,:,j));
+        pause()
+    end
+end
 %% extract features from segmentations - MW & ET
+% initialize an empty array
 features_MW = [];
 features_ET = [];
 
 % features for MW segments
 if flag_feat_MW
     for i = 1:8
-        [temp_features,features_names] = create_features(segments_MW(i), labels_tags(i));
+        temp_features = create_features(segments_MW(i), labels_tags(i), i);
         features_MW = cat(1, features_MW, temp_features);
     end
     % there are too many windows with label 0 so we will only choose some of
@@ -125,17 +130,18 @@ else
     features_MW = features_MW.features_MW;
 end
 
-% features for ET segments
-if flag_feat_ET
-    for i = 1:9
-        [temp_features,features_names] = create_features(segments_ET(i), labels_tags(i));
-        features_ET = cat(1, features_ET, temp_features);
-    end
-    save('features_ET', 'features_ET');
-else
-    features_ET = load('features_ET.mat');
-    features_ET = features_ET.features_ET;
-end
+% % features for ET segments
+% if flag_feat_ET
+%     for i = 1:9
+%         temp_features = create_features(segments_ET(i), labels_tags(i));
+%         features_ET = cat(1, features_ET, temp_features);
+%     end
+%     save('features_ET', 'features_ET');
+% else
+%     features_ET = load('features_ET.mat');
+%     features_ET = features_ET.features_ET;
+% end
 
 %%
-[feat_feat_corr_under_0_7, feat_feat_corr, feat_label_corr, best_feat_feat, best_feat_label] = corr_analysis(features_MW, features_names);
+features_names = get_feat_names();
+[ff_corr_low, ff_corr, fl_corr, best_ff, best_fl] = corr_analysis(features_MW, features_names);

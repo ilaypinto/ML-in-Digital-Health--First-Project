@@ -1,4 +1,4 @@
-function stored_data = store_data(foldername, labels_time)
+function stored_data = extract_data(foldername, labels_time)
 % this fnuction creates a structure containing the recording from all the
 % available sensors. the structure contains 3 fields - gyro, acc and baro.
 % each field is a matrix in which each row is data from different axis in
@@ -27,12 +27,12 @@ headers = data.Properties.VariableNames;    % get table headers
 labels_gyro_acc = zeros(1,time*sample_freq(1));    % start with unlabeled vector
 labels_baro     = zeros(1, time*sample_freq(2));   % matching a recording of 30 min
 
-% define window size After and Before start time for each sensor
-A_WS_Gyro_ACC = round(labels_time*sample_freq(1)*0.9);
-B_WS_Gyro_ACC = round(labels_time*sample_freq(1)*0.1);
+% define Window Size After and Before start time for each sensor
+A_WS_Gyro_ACC = round(labels_time*sample_freq(1)*0.95);
+B_WS_Gyro_ACC = round(labels_time*sample_freq(1)*0.05);
 
-A_WS_baro = round(labels_time*sample_freq(2)*0.9);
-B_WS_baro = round(labels_time*sample_freq(2)*0.1);
+A_WS_baro = round(labels_time*sample_freq(2)*0.95);
+B_WS_baro = round(labels_time*sample_freq(2)*0.05);
 
 for i = 1:height(data(:,headers(1)))
     times      = table2array(data(:, headers(1)));
@@ -51,7 +51,7 @@ for i = 1:height(data(:,headers(1)))
 end
 
 % create the data vectors from Gyro Acc & baro - the vectors are trimmed or
-% padded with zeros in case they dont match to recording time of 30 min!!
+% padded with zeros in case they dont match to recording time of 30 min!
 baro = zeros(1,time*sample_freq(2));       % baro will be zero vector if no measurments are available
 for i = 3:length(list)                                          
     if list(i).name(end-7:end-4) == 'Gyro'

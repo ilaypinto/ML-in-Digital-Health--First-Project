@@ -1,5 +1,4 @@
 function [windows, labels_tags] = extract_segments(datastruct, labels_time, overlap, segment_type)
-% ############### add event trigger segmentation ##################
 % datastruct - data structure containing sensors data and labels
 % labels time - labels duration
 % overlap - windows percentage of overlapping
@@ -11,7 +10,7 @@ function [windows, labels_tags] = extract_segments(datastruct, labels_time, over
 % second dim is the data, third dim is for windows separation.
 
 % labels tags is a vector containing the labels numbers corresonding to
-% their indx in windows cell array.
+% their index in first dim of windows matrix.
 
 
 extra_time = labels_time*0.5;       % extra time for the windows
@@ -73,8 +72,41 @@ end
 
 % event trigger segmentation
 if strcmp(segment_type, 'event trigger')
-    
-    
+    threshold = 30; 
+    indices = abs(gyro(1:3,:)) > threshold;      % our trigger is a threshold in the gyro sensor 
+    indices = find(sum(indices,1));         % find indices where threshold is passed in at least one axis
+    for i = 1:length(indices)
+        % define start and stop indices
+        start_gyro_acc = round(indices(i) - window_size_gyro_acc/2); 
+        stop_gyro_acc  = round(indices(i) + window_size_gyro_acc/2); 
+        start_baro = round((indices(i)/25)*3.82 - window_size_baro/2);
+        stop_baro  = round((indices(i)/25)*3.82 + window_size_baro/2);
+        if start_gyro_acc < 1 || start_baro < 1 || stop_gyro_acc > size(gyro,2) || stop_baro > size(baro,2)
+            continue
+        end
+        % extract the label of the window
+        labels = labels_gyro_acc(1, start_gyro_acc: stop_gyro_acc);
+        tag = unique(labels);
+        if length(tag) == 1
+            M = 0;
+        else
+            M = sum(labels == tag(end));
+        end
+        if M >= labels_time*sample_freq(1) - 1    % above 80% is enought - should be changed to optimize accuracy
+            tag = tag(end);
+        else
+            tag = 0;
+        end
+        windows_idx = find(labels_tags == tag);          % where to store the data in windows
+        % extract sensors data
+        window_gyro = gyro(1:3, start_gyro_acc: stop_gyro_acc);
+        window_acc  = acc(1:3, start_gyro_acc: stop_gyro_acc);
+        window_baro = baro(1, start_baro: stop_baro);
+        % append into windows
+        windows(windows_idx).gyro = cat(3, windows(windows_idx).gyro, window_gyro);
+        windows(windows_idx).acc  = cat(3, windows(windows_idx).acc, window_acc);
+        windows(windows_idx).baro = cat(3, windows(windows_idx).baro, window_baro);
+    end
 end
 end
 

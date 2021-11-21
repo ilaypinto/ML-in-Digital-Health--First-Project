@@ -5,7 +5,7 @@ function [features, features_names] = create_features(varargin)
 % features insert only data structure.
 
 datastruct = varargin{1};
-if nargin == 2
+if nargin > 1
     label = varargin{2};
 end
 
@@ -33,6 +33,7 @@ freq_baro = [0, 1; 1, 2; 2, 3; 3, 3.8]./2;
 
 % Features
 for i=1:size(datastruct.gyro,3)
+    tot_energy = 0;
     sample_features = [];                       % reset this vec every iteration
     for j = 1:7
         vec = data{j}(1,:,i);                   % current vector
@@ -45,6 +46,7 @@ for i=1:size(datastruct.gyro,3)
             Std                     = std(vec);                 % STD value of window
             Ent                     = wentropy(vec,'shannon');  % Entropy of window
             Energy                  = sum((abs(vec)).^2);       % Energy of window
+            tot_energy              = tot_energy + Energy;      % energy of all sensors
             Var                     = var(vec);                 % Variance of window
             Med                     = median(vec);              % Median for window
             [Min, Min_idx]          = min(vec);                 % Minimal value for window
@@ -61,9 +63,6 @@ for i=1:size(datastruct.gyro,3)
             P1 = P2(1:L/2+1); P1(2:end-1) = 2*P1(2:end-1);      % compute the fft
             [M, I] = max(P1);
             max_freq_val = M;
-% Fs = [25, 3.82];
-% freq_accgyro = [0, 2.5 ; 2.5, 5; 5, 10; 10, 15; 15, 20; 20, 24];
-% freq_baro = [0, 1; 1, 2; 2, 3; 3, 3.8];
             band_p = [];
             if j == 7                                                                       % baro sensor            
                 f = Fs(1,2)*(0:(L/2))/L;                      % freq
@@ -88,7 +87,8 @@ for i=1:size(datastruct.gyro,3)
             sample_features = [sample_features, NaN(1,20)];         % need to change it if we change the number of features!!!
         end
     end
-
+    % insert features calculated from multiple sensors
+    sample_features = [sample_features, tot_energy];
     % insert label if needed
     if exist('label')
     sample_features = [sample_features, label];
@@ -96,24 +96,4 @@ for i=1:size(datastruct.gyro,3)
     
     features = cat(1, features, sample_features); % concat features of different windows to create a 2D matrix
 end
-
-% create a cell containing the features names
-names_gyro_acc = char('Mean', 'Std', 'Ent', 'Energy', 'Var', 'Med', 'Min', 'Min_idx', 'Max', 'Max_idx', 'Skew', 'Kurt', 'Iqr', 'max_slope', 'zero_crossing',...
-    'band_p_0_2','band_p_2_5','band_p_5_10','band_p_10_15','band_p_15_20','band_p_20_24', 'max_freq_idx');
-names_baro = char('Mean', 'Std', 'Ent', 'Energy', 'Var', 'Med', 'Min', 'Min_idx', 'Max', 'Max_idx', 'Skew', 'Kurt', 'Iqr', 'max_slope', 'zero_crossing',...
-    'band_p_0_1','band_p_1_2','band_p_2_3','band_p_3_3_8', 'max_freq_idx');
-starter = char('gyro_x ', 'gyro_y ', 'gyro_z ', 'acc_x ', 'acc_y ', 'acc_z ', 'baro ');
-for j = 1:7
-    if j ~= 7
-        for i = 1:length(names_gyro_acc)
-            features_names{length(names_gyro_acc)*(j - 1) + i} = strcat(starter(j,:), names_gyro_acc(i,:));
-        end
-    else
-        for i = 1:length(names_baro)
-            features_names{length(names_gyro_acc)*(j - 1) + i} = strcat(starter(j,:), names_baro(i,:));
-        end
-    end
-end
-
-
 end
