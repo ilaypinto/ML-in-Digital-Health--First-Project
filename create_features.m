@@ -1,4 +1,4 @@
-function [features, features_names] = create_features(varargin)
+function features = create_features(varargin)
 % this function takes a data structure from preproccess_data and extract
 % all kind of different features we decided to use/test/compare.
 % for train features insert a data structure and a label number for test
@@ -8,7 +8,10 @@ datastruct = varargin{1};
 if nargin > 1
     label = varargin{2};
 end
-
+if isempty(datastruct.gyro)
+    features = [];
+    return
+end
 % extract the signals from the structer
 gyro_x = datastruct.gyro(1,:,:);
 gyro_y = datastruct.gyro(2,:,:);
@@ -37,7 +40,7 @@ for i=1:size(datastruct.gyro,3)
     sample_features = [];                       % reset this vec every iteration
     for j = 1:7
         vec = data{j}(1,:,i);                   % current vector
-        if j ~= 7 && ~isempty(find(vec,1))
+        if ~isempty(find(vec,1))
             derv_1 = abs(vec(2:end) - vec(1:end-1));% first derivative
             pos = vec > 0;
             

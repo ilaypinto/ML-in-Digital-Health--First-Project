@@ -1,4 +1,4 @@
-function CFS=calculate_CFS(rcf,rff,feature_ind)
+function CFS = calculate_CFS(rcf, rff, feature_ind)
 
 %  Procedure to calculate correlation feature selection. This parameter
 %  actually take into consideration both feature/feature correlation and
@@ -13,6 +13,7 @@ function CFS=calculate_CFS(rcf,rff,feature_ind)
 %  Output :   CFS - correlation for feature selection values for each
 %  feature
 
-partial_rcf=abs(rcf(feature_ind));
-partial_rff=abs(rff(feature_ind,feature_ind));
-CFS=sum(partial_rcf)/sqrt(sum(sum(partial_rff)));
+partial_rcf = abs(rcf(feature_ind));
+partial_rff = abs(rff(feature_ind, feature_ind));
+CFS = sum(partial_rcf)/sqrt(sum(sum(partial_rff)));
+end
