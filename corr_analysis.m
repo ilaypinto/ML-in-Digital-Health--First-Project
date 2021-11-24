@@ -63,7 +63,7 @@ for i=1:length(indices)
 end
 
 new_corr_mat=feat_label_mat;
-new_corr_mat(removal)=[];
+new_corr_mat(:,removal)=[];
 
 
 end
