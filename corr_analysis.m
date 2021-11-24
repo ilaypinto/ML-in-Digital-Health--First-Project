@@ -62,8 +62,8 @@ for i=1:length(indices)
     end
 end
 
-new_corr_mat=feat_label_mat;
-new_corr_mat(:,removal)=[];
+new_mat=feat_label_mat;
+new_mat(:,removal)=[];
 
 
 end
