@@ -65,4 +65,5 @@ end
 new_corr_mat=feat_label_mat;
 new_corr_mat(removal)=[];
 
+
 end
