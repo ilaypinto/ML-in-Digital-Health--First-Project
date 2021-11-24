@@ -1,5 +1,5 @@
 function [feat_feat_corr_num_under_0_7, feat_feat_corr, feat_label_corr, best_feat_feat,...
-    best_feat_label,features_to_remove] = corr_analysis(feat_label_mat, feat_names)
+    best_feat_label,features_to_remove,new_mat] = corr_analysis(feat_label_mat, feat_names)
 % need to add description
 
 % define empty cells arrays
@@ -41,7 +41,7 @@ best_feat_feat{3}{2} = feat_names{index2};
 
 %Names of features with over 0.7 feature-feature correlation
 
-indices=find(abs(feat_feat_corr) >= 0.7);
+indices=find(and(abs(feat_feat_corr) >= 0.7, abs(feat_feat_corr)~=1) );
 indices_rows=ceil(indices./size(feat_feat_corr, 1));
 for i=1:length(indices)
     if mod(indices(i), size(feat_feat_corr, 1)) == 0
@@ -50,6 +50,19 @@ for i=1:length(indices)
         indices_cols(i) = mod(indices(i), size(feat_feat_corr, 1));
     end
     features_to_remove{i}{1}=feat_names{indices_rows(i)};
-    features_to_remove{i}{2}=feat_names{indices_cols(i)};
+    features_to_remove{i}{2}=indices_rows(i);
+    features_to_remove{i}{3}=feat_names{indices_cols(i)};
+    features_to_remove{i}{4}=indices_cols(i);
+    if abs(feat_label_corr(indices_rows(i))) > abs(feat_label_corr(indices_cols(i)))
+        features_to_remove{i}{5}=indices_cols(i);
+        removal(i)=indices_cols(i);
+    else
+        features_to_remove{i}{5}=indices_rows(i);
+        removal(i)=indices_rows(i);
+    end
 end
+
+new_corr_mat=feat_label_mat;
+new_corr_mat(removal)=[];
+
 end
