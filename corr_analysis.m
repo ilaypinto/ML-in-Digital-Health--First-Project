@@ -18,7 +18,7 @@ feat_feat_corr_under_0_7 = sum(sum(abs(feat_feat_corr) < 0.7))/2;          % Cou
 
 % extract the feature with highest feature label correlation
 best_feat_label{1} = max(abs(feat_label_corr));                             % value of corr
-best_feat_label{2} = find(feat_label_corr == max(abs(feat_label_corr)));    % index of feature in matrix
+best_feat_label{2} = find(abs(feat_label_corr) == max(abs(feat_label_corr)));    % index of feature in matrix
 best_feat_label{3} = feat_names(best_feat_label{2});                        % feature name
 
 % extract the features with lowest festure feature correlation

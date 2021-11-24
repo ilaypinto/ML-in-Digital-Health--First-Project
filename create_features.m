@@ -40,7 +40,7 @@ for i=1:size(datastruct.gyro,3)
     sample_features = [];                       % reset this vec every iteration
     for j = 1:7
         vec = data{j}(1,:,i);                   % current vector
-        if ~isempty(find(vec,1))
+        if j ~= 7 || ~isempty(find(vec,1))
             derv_1 = abs(vec(2:end) - vec(1:end-1));% first derivative
             pos = vec > 0;
             
@@ -96,7 +96,7 @@ for i=1:size(datastruct.gyro,3)
     if exist('label')
     sample_features = [sample_features, label];
     end
-    
+
     features = cat(1, features, sample_features); % concat features of different windows to create a 2D matrix
 end
 end
