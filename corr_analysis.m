@@ -49,17 +49,21 @@ for i=1:length(indices)
     else
         indices_cols(i) = mod(indices(i), size(feat_feat_corr, 1));
     end
-    features_to_remove{i}{1}=feat_names{indices_rows(i)};
-    features_to_remove{i}{2}=indices_rows(i);
-    features_to_remove{i}{3}=feat_names{indices_cols(i)};
-    features_to_remove{i}{4}=indices_cols(i);
-    if abs(feat_label_corr(indices_rows(i))) > abs(feat_label_corr(indices_cols(i)))
-        features_to_remove{i}{5}=indices_cols(i);
-        removal(i)=indices_cols(i);
-    else
-        features_to_remove{i}{5}=indices_rows(i);
-        removal(i)=indices_rows(i);
-    end
+    if indices_cols(i)>indices_rows(i)
+        features_to_remove{end+1}{1}=feat_names{indices_rows(i)};
+        features_to_remove{end+1}{2}=indices_rows(i);
+        features_to_remove{end+1}{3}=feat_names{indices_cols(i)};
+        features_to_remove{end+1}{4}=indices_cols(i);
+        if abs(feat_label_corr(indices_rows(i))) > abs(feat_label_corr(indices_cols(i)))
+            features_to_remove{i}{5}=indices_cols(i);
+            removal(i)=indices_cols(i);
+        else
+            features_to_remove{end+1}{5}=indices_rows(i);
+            removal(end+1)=indices_rows(i);
+        end
+     else
+        ;
+     end
 end
 
 new_mat=feat_label_mat;
