@@ -13,7 +13,7 @@ for j = 1:7
         end
     else
         for i = 1:size(names_baro, 1)
-            features_names{size(names_baro, 1)*(j - 1) + i} = strcat(starter(j,:), names_baro(i,:));
+            features_names{size(names_gyro_acc, 1)*(j - 1) + i} = strcat(starter(j,:), names_baro(i,:));
         end
     end
 end
