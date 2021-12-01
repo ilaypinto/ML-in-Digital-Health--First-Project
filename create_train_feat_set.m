@@ -1,4 +1,4 @@
-function features = create_feat_set(data_set, mat_file_name, flag_feat, labels_tags)
+function features = create_train_feat_set(data_set, mat_file_name, flag_feat, labels_tags)
 % this function create a feature set for data set
 
 % initialize an empty array
@@ -13,8 +13,8 @@ if flag_feat
     % there are too many windows with label 0 so we will only choose some of
     % them randomly to train our model with
     N = size(data_set(9).gyro, 3);                                      % num of label 0 windows
-    if N > size(features, 1)*(2/8)
-        idx = unique(randi([0 N], 1, round(size(features, 1)*(2/8))));        % random indices
+    if N > size(features, 1)
+        idx = unique(randi([0 N], 1, round(size(features, 1))));        % random indices
         data_set(9).gyro = data_set(9).gyro(:,:,idx);
         data_set(9).acc = data_set(9).acc(:,:,idx);
         data_set(9).baro = data_set(9).baro(:,:,idx);

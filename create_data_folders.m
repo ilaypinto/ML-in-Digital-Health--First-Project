@@ -3,7 +3,7 @@ function folders = create_data_folders(O_filepath)
 
 folders = [];                                       % store the folders for later calls
 listing = dir(O_filepath);                          % get files info
-for i = 120:length(listing) - 2
+for i = 3:length(listing)
     name = listing(i).name;                         % name of the file
     tags = split(name,'.'); 
     group = tags{1};                                % group number
