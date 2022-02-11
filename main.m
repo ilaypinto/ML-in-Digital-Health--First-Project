@@ -1,5 +1,5 @@
 function main(filepath)
-% this function recieves a path pinting to where the data CSV files are
+% this function recieves a path pointing to where the data CSV files are
 % stored, preprocess the data and predict using our selected model.
 % the model selected uses Event Trigger segmentation!
 
@@ -18,15 +18,15 @@ overlap = 90;               % doesnt realy being used here but some functions re
 folders = create_data_folders(filepath);
 data = data_from_csv(folders, flag_data_csv, label_time, 0);
 ET_train_set = create_data_set(folders, data, segmentation, overlap, 'test', label_time, flag_segm_ET, 0);
-ET_train_feat = create_best_feat_set(ET_train_set, labels_tags);
+ET_train_feat = create_ET_best_feat_set(ET_train_set, labels_tags);
 
-model = load('train model');
+model = load('trained model');
 model = model.trainedModel;
 
 predictions = model.predictFcn(ET_train_feat(:,1:end - 1));
-table = confusionmat(ET_train_feat(:,end), predictions);
+table = confusionmat(ET_train_feat(:,end), predictions, 'order', labels_tags);
 figure(1);
-confusionchart(table);
+confusionchart(table, labels_tags);
 end
 
 

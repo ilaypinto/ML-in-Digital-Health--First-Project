@@ -1,9 +1,21 @@
 function stored_data = extract_data(foldername, labels_time)
 % this fnuction creates a structure containing the recording from all the
-% available sensors. the structure contains 3 fields - gyro, acc and baro.
-% each field is a matrix in which each row is data from different axis in
-% the following order - x,y,z,labels.
+% available sensors. the structure contains 3 fields - 'gyro', 'acc' and 
+% 'baro'. each field is a 2D matrix in which each row is data from 
+% different axis in the following order - x,y,z,labels.
 % baro field will be zeros if no record is available. 
+%
+% inputs:
+%        - FOLDERNAME - the folder name as an int to read the csv files
+%                       from.
+%        - LABELs_TIME - duration of movements. this is used to build the
+%                        label vector for each sensor.
+%
+% outputs:
+%        - STORED_DATA - a stucture containing the data and labels from the
+%                        csv files
+
+
 
 % extract files for later use
 path = strcat('data/meta-motion/Full recordings/' ,foldername);
@@ -24,8 +36,9 @@ sample_freq = [25, 3.82];                   % define the sample frequency
 time = 30*60;                               % define the time of the signal in sec
 headers = data.Properties.VariableNames;    % get table headers
 
-labels_gyro_acc = zeros(1,time*sample_freq(1));    % start with unlabeled vector
-labels_baro     = zeros(1, time*sample_freq(2));   % matching a recording of 30 min
+% start with unlabeled vector matching a recording of 30 min
+labels_gyro_acc = zeros(1,time*sample_freq(1));    
+labels_baro     = zeros(1, time*sample_freq(2));   
 
 % define Window Size After and Before start time for each sensor
 A_WS_Gyro_ACC = round(labels_time*sample_freq(1)*0.95);
@@ -34,6 +47,7 @@ B_WS_Gyro_ACC = round(labels_time*sample_freq(1)*0.05);
 A_WS_baro = round(labels_time*sample_freq(2)*0.95);
 B_WS_baro = round(labels_time*sample_freq(2)*0.05);
 
+% create the label vectors
 for i = 1:height(data(:,headers(1)))
     times      = table2array(data(:, headers(1)));
     labels     = table2array(data(:,headers(2)));

@@ -1,8 +1,6 @@
 function features = create_features(varargin)
 % this function takes a data structure from preproccess_data and extract
 % all kind of different features we decided to use/test/compare.
-% for train features insert a data structure and a label number for test
-% features insert only data structure.
 
 datastruct = varargin{1};
 if nargin > 1
@@ -32,7 +30,7 @@ features=[];
 % define some variables to use when computing features
 Fs = [25, 3.82];
 freq_accgyro = [0, 2.5 ; 2.5, 5; 5, 10; 10, 15; 15, 20; 20, 24]./2;
-freq_baro = [0, 1; 1, 2; 2, 3; 3, 3.8]./2;
+freq_baro = [0, 1; 1, 2; 2, 3; 3, 3.6]./2;
 
 % Features
 for i=1:size(datastruct.gyro,3)
@@ -60,10 +58,11 @@ for i=1:size(datastruct.gyro,3)
             max_slope               = max(derv_1);              % max slope
             zero_crossing           = abs(sum(pos(2:end)...
                                             - pos(1:end-1)));   % zero crossing
+            min_max_idx_diff = abs(Max_idx - Min_idx);
     
     % freq domain features
             Y = fft(vec); L = length(vec); P2 = abs(Y/L);       % compute the fft      
-            P1 = P2(1:L/2+1); P1(2:end-1) = 2*P1(2:end-1);      % compute the fft
+            P1 = P2(1:floor(L/2+1)); P1(2:end-1) = 2*P1(2:end-1);      
             [M, I] = max(P1);
             max_freq_val = M;
             band_p = [];
@@ -85,13 +84,23 @@ for i=1:size(datastruct.gyro,3)
                 end
             end
             % concat the features from different axis of different sensors
-            sample_features = [sample_features, Mean, Std, Ent, Energy, Var, Med, Min, Min_idx, Max, Max_idx, Skew, Kurt, Iqr, max_slope, zero_crossing, band_p, max_freq_idx];
+            sample_features = [sample_features, Mean, Std, Ent, Energy, Var, Med, Min, Min_idx, Max, Max_idx, Skew, Kurt, Iqr, max_slope, zero_crossing, band_p, max_freq_idx, min_max_idx_diff];
         else
-            sample_features = [sample_features, NaN(1,20)];         % need to change it if we change the number of features!!!
+            sample_features = [sample_features, NaN(1,21)];         % need to change it if we change the number of features!!!
         end
     end
     % insert features calculated from multiple sensors
-    sample_features = [sample_features, tot_energy];
+    gyro_x = data{1}(1,:,i); gyro_y = data{2}(1,:,i); gyro_z = data{3}(1,:,i); acc_x = data{4}(1,:,i); acc_y = data{5}(1,:,i); acc_z = data{6}(1,:,i); baro = data{7}(1,:,i);
+    acc_std = std(acc_x) + std(acc_y) + std(acc_z);
+    acc_std_end = std(acc_x(end-5:end)) + std(acc_y(end-5:end)) + std(acc_z(end-5:end));
+    acc_std_start = std(acc_x(1:5)) + std(acc_y(1:5)) + std(acc_z(1:5));
+    gyro_energy_start = sum(abs(gyro_x(1:5)) + abs(gyro_y(1:5))+ abs(gyro_z(1:5)));
+    gyro_energy_end = sum(abs(gyro_x(end-5:end)) + abs(gyro_y(end-5:end))+ abs(gyro_z(end-5:end)));
+
+
+    sample_features = [sample_features, tot_energy, acc_std, acc_std_end, acc_std_start, gyro_energy_start, gyro_energy_end];
+
+    
     % insert label if needed
     if exist('label')
     sample_features = [sample_features, label];

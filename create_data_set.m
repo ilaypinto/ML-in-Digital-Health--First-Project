@@ -1,8 +1,30 @@
 function data_set = create_data_set(folders, data, segmentation, overlap, mat_file_name, label_time, flag, save_bool)
 % this function creates a data set from folders specified.
-% the data is segmented as specified.
+% inputs:
+%       - FOLDERS - vector of integers to extract data from folders with
+%                   that number.
+%       - DATA - a cell array containing the sensors data as structures.
+%       - SEGMENTATION - type of segmentation to create the data set with,
+%                        a string of either 'moving window' or 'event trigger'.
+%       - OVERLAP - overlap in percentage to do if 'moving window' is the
+%                   desired segmentation mehthod.
+%       - MAT_FILE_NAME - string, the name of the mat file of the saved data set
+%       - LABEL_TIME - int, the duration of the movements
+%       - FLAG - bool, specifies if the data set should be created or
+%                loaded.
+%       - SAVE_BOOL - bool, specifies if the data set should be saved or
+%                     not.
+%
+% outputs:
+%       - DATA_SET - an array of stuctures with fields 'gyro', 'acc' and 'baro' 
+%                    containing the data of each window segmented from the 
+    %                    full recording. each structure holds movements from a single label.
+    %                    the order is [12 22 3 4 5 6 11 21 0] where 12 is in
+    %                    index 1 and 0 in index 9.
 
-% segmentation and sorting the recording by movement labels - Moving Window & Event Trigger
+
+
+% segmentation and sorting the recording by movement labels - Moving Window & Event Trigger.
 % initialize matrixes with empty structures
 struc.gyro = [];
 struc.acc  = [];

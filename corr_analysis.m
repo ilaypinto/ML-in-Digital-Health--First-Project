@@ -17,7 +17,10 @@ nan_exmpl_idx = sum(isnan(feat_mat),2);
 
 % Compute correlations
 [idx_relieff_all, weights_all] = relieff(feat_mat(nan_exmpl_idx == 0,:), label_vec(nan_exmpl_idx == 0,:), k);   % Features-Labels correlation fo all feat
-[idx_relieff_no_nan, weights_all_no_nan] = relieff(feat_mat(:,nan_feat_idx == 0), label_vec, k);                % Features-Labels correlation for feat without nans
+[~, weights_all_no_nan_temp] = relieff(feat_mat(:,nan_feat_idx == 0), label_vec, k);                % Features-Labels correlation for feat without nans
+
+weights_all_no_nan = zeros(1, size(feat_mat,2));
+weights_all_no_nan(~nan_feat_idx) = weights_all_no_nan_temp;
 
 feat_feat_corr_nan = corr(feat_mat, 'type', 'Spearman', 'rows', 'all');                 % Features-Features correlation
 feat_feat_corr_all = corr(feat_mat, 'type', 'Spearman', 'rows', 'pairwise');            % Features-Features correlation
@@ -26,7 +29,7 @@ feat_feat_corr(isnan(feat_feat_corr)) = feat_feat_corr_all(isnan(feat_feat_corr)
 
 % extract the feature with highest feature label correlation
 best_feat_label{1} = [weights_all(idx_relieff_all(1)), weights_all(idx_relieff_all(2))];    % value of relieff
-best_feat_label{2} = [idx_relieff_all(1), idx_relieff_all(2)];                           % index of feature in matrix
+best_feat_label{2} = [idx_relieff_all(1), idx_relieff_all(2)];                              % index of feature in matrix
 best_feat_label{3} = feat_names([idx_relieff_all(1), idx_relieff_all(2)]);                  % feature name
 
 % find and remove features with over 0.7 feature-feature correlation

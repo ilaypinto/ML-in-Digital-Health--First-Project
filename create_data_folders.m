@@ -9,6 +9,9 @@ for i = 3:length(listing)
     group = tags{1};                                % group number
     rec = tags{2};                                  % recording number
     k = (str2num(group) - 1)*12 + str2num(rec);     % folder number to match group and record numbers
+    if isempty(k)
+        continue
+    end
     folders(end + 1) = k;
     % check if folder 'k' exist and if not create one
     new_folders = dir('data\meta-motion\Full recordings');
