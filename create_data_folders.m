@@ -3,12 +3,15 @@ function folders = create_data_folders(O_filepath)
 
 folders = [];                                       % store the folders for later calls
 listing = dir(O_filepath);                          % get files info
-for i = 120:length(listing) - 2
+for i = 3:length(listing)
     name = listing(i).name;                         % name of the file
     tags = split(name,'.'); 
     group = tags{1};                                % group number
     rec = tags{2};                                  % recording number
     k = (str2num(group) - 1)*12 + str2num(rec);     % folder number to match group and record numbers
+    if isempty(k)
+        continue
+    end
     folders(end + 1) = k;
     % check if folder 'k' exist and if not create one
     new_folders = dir('data\meta-motion\Full recordings');

@@ -68,7 +68,7 @@ tabulate(species(istrain))
 %% Create the RandomForest ensemble
 t = templateTree('MaxNumSplits',3,'NumVariablesToSample',1);
 num_trees=35;
-features=best_indices;%[2,4];%1:4;
+features=1:4;%[2,4];%1:4;
 tic
 bagTree = fitcensemble(meas(istrain,features),species(istrain),'Method','bag', ...
 'NumLearningCycles',num_trees,'Learners',t,'nprint',10);
